@@ -1,36 +1,63 @@
 from crewai import Agent
 from textwrap import dedent
-from langchain.llms import OpenAI, Ollama
-from langchain_openai import ChatOpenAI
+from langchain_openai import AzureChatOpenAI
+from tools.calculator_tools import CalculatorTools
+from tools.search_tools import SearchTools
+from tools.browser_tools import BrowserTools
 
+
+default_llm = AzureChatOpenAI(
+    openai_api_version="2023-07-01-preview",
+    azure_deployment="gpt-4-32k",
+    azure_endpoint="",
+    api_key=""
+)
 
 # This is an example of how to define custom agents.
 # You can define as many agents as you want.
 # You can also define custom tasks in tasks.py
-class CustomAgents:
-    def __init__(self):
-        self.OpenAIGPT35 = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.7)
-        self.OpenAIGPT4 = ChatOpenAI(model_name="gpt-4", temperature=0.7)
-        self.Ollama = Ollama(model="openhermes")
+class TripAgents():
 
-    def agent_1_name(self):
+    def city_selection_agent(self):
         return Agent(
-            role="Define agent 1 role here",
-            backstory=dedent(f"""Define agent 1 backstory here"""),
-            goal=dedent(f"""Define agent 1 goal here"""),
-            # tools=[tool_1, tool_2],
-            allow_delegation=False,
+            role='City Selection Expert',
+            goal='Select the best city from {cities} based on weather, season, and prices',
+            backstory=
+            'An expert in analyzing travel data to pick ideal destinations',
+            tools=[
+                SearchTools.search_internet,
+                #BrowserTools.scrape_and_summarize_website,
+            ],
             verbose=True,
-            llm=self.OpenAIGPT35,
+            llm=default_llm
         )
 
-    def agent_2_name(self):
+    def local_expert(self):
         return Agent(
-            role="Define agent 2 role here",
-            backstory=dedent(f"""Define agent 2 backstory here"""),
-            goal=dedent(f"""Define agent 2 goal here"""),
-            # tools=[tool_1, tool_2],
-            allow_delegation=False,
+            role='Local Expert at this city',
+            goal='Provide the BEST insights about the selected city',
+            backstory="""A knowledgeable local guide with extensive information
+            about the city, it's attractions and customs""",
+            tools=[
+                SearchTools.search_internet,
+                #BrowserTools.scrape_and_summarize_website,
+            ],
             verbose=True,
-            llm=self.OpenAIGPT35,
+            llm=default_llm
+        )
+    
+    def travel_concierge(self):
+        return Agent(
+            role='Amazing Travel Concierge',
+            goal="""Create the most amazing travel itineraries with budget and 
+            packing suggestions for the city""",
+            backstory="""Specialist in travel planning and logistics with 
+            decades of experience""",
+            tools=[
+                SearchTools.search_internet,
+                #BrowserTools.scrape_and_summarize_website,
+                CalculatorTools.calculate,
+            ],
+            verbose=True,
+            llm=default_llm
         )

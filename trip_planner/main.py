@@ -4,7 +4,16 @@ from trip_agents import TripAgents
 from trip_tasks import TripTasks
 
 from dotenv import load_dotenv
+from langchain_openai import AzureChatOpenAI
+
 load_dotenv()
+
+default_llm = AzureChatOpenAI(
+    openai_api_version="2023-07-01-preview",
+    azure_deployment="gpt-4-32k",
+    azure_endpoint="https://aoai-models-kapeltol.openai.azure.com/",
+    api_key="aa4a3071c5a04b0d912cf95344fb7329"
+)
 
 class TripCrew:
 
